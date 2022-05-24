@@ -167,9 +167,7 @@
     </v-row>
     <v-row v-if="Object.keys(readQueryOpts()).length">
       <v-col>
-        <h2>
-          Query Options
-        </h2>
+        <h2>Query Options</h2>
         <pre>{{ prettyJson(readQueryOpts()) }}</pre>
       </v-col>
     </v-row>
@@ -224,8 +222,8 @@
                   <v-icon color="red">mdi-cancel</v-icon>
                 </v-list-item-icon>
                 <v-list-item-content color="red">
-                  <v-list-item-title color="red" style="color: 'red';"
-                    ><span style="color: red;">{{ error }}</span></v-list-item-title
+                  <v-list-item-title color="red" style="color: 'red'"
+                    ><span style="color: red">{{ error }}</span></v-list-item-title
                   >
                 </v-list-item-content>
               </v-list-item>
@@ -278,7 +276,7 @@ export default {
       isJsonValid: true,
       isJsonValidating: false,
       JSONIs: "document",
-      queryModifiers: { limit: 10, startAt: 1 },
+      queryModifiers: { limit: 10, startAt: "" },
       orderBy1: { property: "", direction: "asc" },
       orderBy2: { property: "", direction: "asc" },
       whereValues: {},
@@ -372,7 +370,7 @@ export default {
       // this.selectedDocumentType = types[0]; // oh so hackisch FIXME
       console.log({ types });
       // eslint-disable-next-line
-      this.selectedDocumentType = this.selectedDocumentTypeProp ||types[0]
+      this.selectedDocumentType = this.selectedDocumentTypeProp || types[0];
 
       return types;
     },

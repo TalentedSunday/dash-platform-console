@@ -2,11 +2,12 @@ import Vue from "vue";
 import Vuex from "vuex";
 import axios from "axios";
 import createPersistedState from "vuex-persistedstate";
+// import localforage from "localforage";
 
 Vue.use(Vuex);
 
-      console.log('process.env', process.env)
-      console.dir(process.env)
+console.log("process.env", process.env);
+console.dir(process.env);
 
 const DashJS = require("dash");
 console.log({ DashJS });
@@ -146,12 +147,12 @@ export default new Vuex.Store({
         // const req = await this.$axios.get(`http://localhost:5000/evodrip/us-central1/evofaucet/drip/${address}`)
         const reqs = [
           // axios.get(`https://us-central1-evodrip.cloudfunctions.net/evofaucet/drip/${address}`),
-          axios.get(`http://134.122.104.155:5050/drip/${address}`),
+          axios.get(`http://autofaucet-1.dashevo.io:5050/drip/${address}`),
         ];
 
         if (process.env.VUE_APP_DAPIADDRESSES && JSON.parse(process.env.VUE_APP_DAPIADDRESSES)[0]) {
-          const ip = JSON.parse(process.env.VUE_APP_DAPIADDRESSES)[0].split(':')[0]
-          reqs.push(axios.get(`http://${ip}:5050/drip/${address}`))
+          const ip = JSON.parse(process.env.VUE_APP_DAPIADDRESSES)[0].split(":")[0];
+          reqs.push(axios.get(`http://${ip}:5050/drip/${address}`));
         }
 
         await Promise.race(reqs);
@@ -207,7 +208,7 @@ export default new Vuex.Store({
           satoshis: satoshis, // 1 Dash
         });
         const result = await account.broadcastTransaction(transaction);
-       console.log("Transaction broadcast!\nTransaction ID:", result);
+        console.log("Transaction broadcast!\nTransaction ID:", result);
         dispatch("refreshWallet");
       } catch (e) {
         console.error("Something went wrong:", e);
@@ -217,29 +218,40 @@ export default new Vuex.Store({
     },
     async queryDocuments({ commit, dispatch }, { contractId, typeLocator, queryOpts }) {
       console.log("queryDocuments()");
-      console.log({ contractId });
-      console.log({ typeLocator });
-      console.log({ queryOpts });
+      console.log("contractId :>> ", contractId);
+      console.log("typeLocator :>> ", typeLocator);
+      console.log("queryOpts :>> ", queryOpts);
       commit("setSyncing", true);
       try {
         let clientOptsQuery = {
-          passFakeAssetLockProofForTests: process.env.VUE_APP_LOCALNODE,
-          dapiAddresses: process.env.VUE_APP_DAPIADDRESSES ? JSON.parse(process.env.VUE_APP_DAPIADDRESSES) : undefined,
+          network: "testnet",
+          dapiAddresses: process.env.VUE_APP_DAPIADDRESSES
+            ? JSON.parse(process.env.VUE_APP_DAPIADDRESSES)
+            : undefined,
           apps: {
             tutorialContract: {
               contractId,
             },
-            dpns: process.env.VUE_APP_DPNS_CONTRACT_ID ? { contractId: process.env.VUE_APP_DPNS_CONTRACT_ID } : undefined
+            dpns: process.env.VUE_APP_DPNS_CONTRACT_ID
+              ? { contractId: process.env.VUE_APP_DPNS_CONTRACT_ID }
+              : undefined,
           },
         };
-        clientOptsQuery = JSON.parse(JSON.stringify(clientOptsQuery))
+        clientOptsQuery = JSON.parse(JSON.stringify(clientOptsQuery));
         console.log({ clientOptsQuery });
         const clientQuery = new DashJS.Client(clientOptsQuery);
         // await clientQuery.isReady();
+        // const documents = await clientQuery.platform.documents.get(
+        //   `tutorialContract.${typeLocator}`,
+        //   queryOpts
+        // );
+        queryOpts = JSON.parse(JSON.stringify(queryOpts));
+
         const documents = await clientQuery.platform.documents.get(
           `tutorialContract.${typeLocator}`,
           queryOpts
         );
+
         clientQuery.disconnect();
         console.log("Found documents: ", { documents });
         commit("setDocuments", { contractId, documents });
@@ -251,17 +263,8 @@ export default new Vuex.Store({
       }
     },
     async searchDashNames({ commit, dispatch }, searchString) {
-      let queryOpts = {
-        where: [
-          ["normalizedParentDomainName", "==", "dash"],
-          ["normalizedLabel", "startsWith", searchString.toLowerCase()],
-        ],
-        startAt: 0,
-        limit: 20,
-        orderBy: [["normalizedLabel", "asc"]],
-      };
       try {
-        const searchNames = await client.platform.documents.get("dpns.domain", queryOpts);
+        const searchNames = await client.platform.names.search(searchString, "dash");
         console.log({ searchNames });
         commit("setSearchNames", searchNames);
       } catch (e) {
@@ -324,7 +327,7 @@ export default new Vuex.Store({
           // If validation passed, broadcast contract
 
           console.log("validation passed, broadcasting contract..");
-          await platform.contracts.broadcast(contract, identity);
+          await platform.contracts.publish(contract, identity);
         } else {
           // If validation errors exist, log to console and throw the first.
 
@@ -345,8 +348,10 @@ export default new Vuex.Store({
       console.log({ json });
 
       let clientAppsOpts = {
-        passFakeAssetLockProofForTests: process.env.VUE_APP_LOCALNODE,
-        dapiAddresses: process.env.VUE_APP_DAPIADDRESSES ? JSON.parse(process.env.VUE_APP_DAPIADDRESSES) : undefined,
+        network: "testnet",
+        dapiAddresses: process.env.VUE_APP_DAPIADDRESSES
+          ? JSON.parse(process.env.VUE_APP_DAPIADDRESSES)
+          : undefined,
         wallet: { mnemonic: this.state.wallet.mnemonic },
         apps: {
           tutorialContract: {
@@ -356,8 +361,8 @@ export default new Vuex.Store({
       };
       console.log("second dashjs client opts", clientAppsOpts);
 
-      clientAppsOpts = JSON.parse(JSON.stringify(clientAppsOpts))
-      
+      clientAppsOpts = JSON.parse(JSON.stringify(clientAppsOpts));
+
       const sdkApps = new DashJS.Client(clientAppsOpts);
       const { platform } = sdkApps;
 
@@ -398,21 +403,24 @@ export default new Vuex.Store({
       console.log({ json });
 
       let clientAppsOpts = {
-        passFakeAssetLockProofForTests: process.env.VUE_APP_LOCALNODE,
-        dapiAddresses: process.env.VUE_APP_DAPIADDRESSES ? JSON.parse(process.env.VUE_APP_DAPIADDRESSES) : undefined,
+        network: "testnet",
+        dapiAddresses: process.env.VUE_APP_DAPIADDRESSES
+          ? JSON.parse(process.env.VUE_APP_DAPIADDRESSES)
+          : undefined,
         wallet: { mnemonic: this.state.wallet.mnemonic },
         apps: {
           tutorialContract: {
             contractId,
           },
-          dpns: process.env.VUE_APP_DPNS_CONTRACT_ID ? { contractId: process.env.VUE_APP_DPNS_CONTRACT_ID } : undefined
-
+          dpns: process.env.VUE_APP_DPNS_CONTRACT_ID
+            ? { contractId: process.env.VUE_APP_DPNS_CONTRACT_ID }
+            : undefined,
         },
       };
-        
+
       console.log("second dashjs client opts", clientAppsOpts);
 
-      clientAppsOpts = JSON.parse(JSON.stringify(clientAppsOpts))
+      clientAppsOpts = JSON.parse(JSON.stringify(clientAppsOpts));
       const sdkApps = new DashJS.Client(clientAppsOpts);
       const { platform } = sdkApps;
 
@@ -465,23 +473,28 @@ export default new Vuex.Store({
           console.log(e);
         }
         let clientOpts = {
-            passFakeAssetLockProofForTests: process.env.VUE_APP_LOCALNODE,
-            dapiAddresses: process.env.VUE_APP_DAPIADDRESSES ? JSON.parse(process.env.VUE_APP_DAPIADDRESSES) : undefined,
+          network: "testnet",
+          dapiAddresses: process.env.VUE_APP_DAPIADDRESSES
+            ? JSON.parse(process.env.VUE_APP_DAPIADDRESSES)
+            : undefined,
 
           wallet: {
+            // adapter: localforage,
             mnemonic,
           },
           apps: {
-            dpns: process.env.VUE_APP_DPNS_CONTRACT_ID ? { contractId: process.env.VUE_APP_DPNS_CONTRACT_ID } : undefined
-          }
-        }
-        
+            dpns: process.env.VUE_APP_DPNS_CONTRACT_ID
+              ? { contractId: process.env.VUE_APP_DPNS_CONTRACT_ID }
+              : undefined,
+          },
+        };
+
         //remove undefined keys
-        
-        clientOpts = JSON.parse(JSON.stringify(clientOpts))
-        
+
+        clientOpts = JSON.parse(JSON.stringify(clientOpts));
+
         console.log("mnemonic is", mnemonic);
-        console.log('clientOpts :>> ', clientOpts);
+        console.log("clientOpts :>> ", clientOpts);
         client = new DashJS.Client(clientOpts);
         // const onReceivedTransaction = function (data) {
         //   const { account } = client;
@@ -504,7 +517,7 @@ export default new Vuex.Store({
         console.dir({ client }, { depth: 5 });
       } catch (e) {
         console.debug("Wallet synchronized with an error:");
-        console.error(e)
+        console.error(e);
         dispatch("showSnackError", e);
         commit("setError", e);
         commit("setSyncing", false);
@@ -616,7 +629,7 @@ export default new Vuex.Store({
       const { searchNames } = state;
       return searchNames.map((document) => ({
         label: document.label,
-        dashIdentity: document.records.dashIdentity,
+        id: document.$id,
       }));
     },
     applicationIdentitiesWithContracts(state) {

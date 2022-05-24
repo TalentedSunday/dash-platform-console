@@ -1,5 +1,5 @@
 <template>
-  <v-container style="max-width: 900px;">
+  <v-container style="max-width: 900px">
     <v-row align="center" justify="center">
       <v-col class="d-flex" cols="12">
         <v-combobox
@@ -18,7 +18,7 @@
           top
           right
           color="primary"
-          style="z-index: 4; left: 0px;"
+          style="z-index: 4; left: 0px"
           @click="createIdentity()"
         >
           <v-icon>mdi-plus</v-icon>
@@ -99,7 +99,7 @@
             <tbody>
               <tr v-for="(user, i) in searchDashNameList" :key="i">
                 <td>{{ user.label }}</td>
-                <td>{{ user.dashIdentity }}</td>
+                <td>{{ user.id }}</td>
               </tr>
             </tbody>
           </v-simple-table>
@@ -259,6 +259,7 @@ export default {
             console.log("done fetching unknown contract and adding to state");
           }
         } else {
+          // the selectedIdentity variable is the user search string
           console.log("searching for username", selectedIdentity);
           this.submittingSearch = true;
           this.$store.commit("setSyncing", true);

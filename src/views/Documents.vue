@@ -337,8 +337,7 @@ export default {
         }
       }
       this.queryOpts.where = where.length ? where : undefined;
-
-      console.dir(this.queryOpts, { depth: 5 });
+      console.log("this.queryOpts :>> ", this.queryOpts);
       queryDocuments({
         contractId: selectedContractId,
         typeLocator: selectedDocumentType,
