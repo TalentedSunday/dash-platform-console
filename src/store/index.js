@@ -2,7 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 import axios from "axios";
 import createPersistedState from "vuex-persistedstate";
-// import localforage from "localforage";
+import localforage from "localforage";
 
 Vue.use(Vuex);
 
@@ -479,7 +479,6 @@ export default new Vuex.Store({
             : undefined,
 
           wallet: {
-            // adapter: localforage,
             mnemonic,
           },
           apps: {
@@ -492,8 +491,10 @@ export default new Vuex.Store({
         //remove undefined keys
 
         clientOpts = JSON.parse(JSON.stringify(clientOpts));
+        clientOpts.wallet.adapter = localforage;
 
         console.log("mnemonic is", mnemonic);
+
         console.log("clientOpts :>> ", clientOpts);
         client = new DashJS.Client(clientOpts);
         // const onReceivedTransaction = function (data) {
