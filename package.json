@@ -8,9 +8,6 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint --fix"
   },
-  "engines": {
-    "node": "16.13.1"
-  },
   "dependencies": {
     "@chenfengyuan/vue-qrcode": "^1.0.2",
     "axios": "^0.19.2",
