@@ -9,7 +9,7 @@
     "lint": "vue-cli-service lint --fix"
   },
   "engines": {
-    "node": "19.x"
+    "node": "16.18.1"
   },
   "dependencies": {
     "@chenfengyuan/vue-qrcode": "^1.0.2",
