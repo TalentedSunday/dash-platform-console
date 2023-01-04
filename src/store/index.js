@@ -15,19 +15,29 @@ export const identityTypes = {
   },
 };
 
-export default new Vuex.Store({
-  state: {
-    identities: {
-      user: [],
-      application: [],
-    },
-    names: {},
-    contracts: {},
-    documents: {},
+const getDefaultState = () => ({
+  identities: {
+    user: [],
+    application: [],
   },
+  names: {},
+  contracts: [],
+  documents: {},
+});
+
+export default new Vuex.Store({
+  state: getDefaultState(),
   mutations: {
     addIdentity(state, { identity, type }) {
-      state.identities[type.name].push(identity);
+      if (state.identities[type.name]) {
+        state.identities[type.name].push(identity);
+      } else {
+        state.identities = {
+          user: [],
+          application: [],
+        };
+        state.identities[type.name].push(identity);
+      }
     },
     addName(state, { identity, name }) {
       const { id } = identity;
@@ -40,12 +50,20 @@ export default new Vuex.Store({
         ],
       };
     },
-    addContract(state, { identity, contract }) {
-      const { id } = identity;
-      state.contracts = {
-        ...state.contracts,
-        [id]: contract,
-      };
+    addContract(state, { id, identity }) {
+      state.contracts.push({
+        id,
+        identity,
+        contract: null,
+      });
+    },
+    updateContract(state, { selectedContract, contract }) {
+      const { id } = selectedContract;
+      console.log(state.contracts.find(v => id === v.id));
+      state.contracts.find(v => id === v.id).contract = contract;
+    },
+    resetState(state) {
+      Object.assign(state, getDefaultState());
     },
   },
   actions: {
@@ -61,11 +79,18 @@ export default new Vuex.Store({
       });
       commit('addName', { identity, name });
     },
-    async registerContract({ commit }, { identity, json }) {
+    async initContract({ commit }, { identity }) {
+      const id = `t_contract_id_${Date.now()}`;
+      commit('addContract', { id, identity });
+    },
+    async registerContract({ commit }, { selectedContract, json }) {
       const contract = await new Promise((resolve) => {
         setTimeout(() => resolve(json), 2000);
       });
-      commit('addContract', { identity, contract });
+      commit('updateContract', { selectedContract, contract });
+    },
+    async removeAllData({ commit }) {
+      commit('resetState');
     },
   },
   getters: {
@@ -87,7 +112,7 @@ export default new Vuex.Store({
       const { application } = state.identities;
       return application.map(identity => ({
         ...identity,
-        contract: state.contracts[identity.id],
+        contract: state.contracts.filter(contract => identity.id === contract.identity),
       }));
     },
   },

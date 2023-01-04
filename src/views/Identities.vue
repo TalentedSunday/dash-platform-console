@@ -19,7 +19,7 @@
             </v-btn>
           </v-col>
         </v-row>
-        <v-list shaped v-if="list.items.length">
+        <v-list shaped v-if="list.items">
           <v-list-item v-for="identity in list.items" :key="identity.id">
             <v-list-item-content>
               <v-list-item-title>

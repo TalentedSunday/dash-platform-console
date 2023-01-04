@@ -5,8 +5,7 @@
         <v-simple-table>
           <thead>
             <tr>
-              <th>Id</th>
-              <th>Contract</th>
+              <th><h1>Contract List</h1></th>
             </tr>
           </thead>
           <tbody>
@@ -14,11 +13,29 @@
               v-for="identity in applicationIdentitiesWithContracts"
               :key="identity.id"
             >
-              <td>{{ identity.id }}</td>
-              <td>
-                <v-btn text @click="() => openDialog(identity)">
-                  {{ identity.contract ? 'view' : 'register' }}
-                </v-btn>
+              <td class="pb-5">
+                <div class="d-flex justify-space-between align-center">
+                  <h2 class="py-5">{{ identity.id }}</h2>
+
+                  <v-btn text @click="() => addNewContract(identity)">
+                    <v-icon>mdi-plus</v-icon>
+                  </v-btn>
+                </div>
+                <v-simple-table v-if="identity.contract.length > 0">
+                  <tbody>
+                    <tr
+                      v-for="contract in identity.contract"
+                      :key="contract.id"
+                    >
+                      <td>{{ contract.id }}</td>
+                      <td>
+                        <v-btn text @click="() => openDialog(contract)">
+                          {{ contract.contract == null ? 'Register' : 'View' }}
+                        </v-btn>
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-simple-table>
               </td>
             </tr>
           </tbody>
@@ -43,9 +60,9 @@
             <v-btn icon @click="showJsonDialog = false">
               <v-icon>mdi-close</v-icon>
             </v-btn>
-            <v-toolbar-title>Contract for {{selectedIdentity.id}}</v-toolbar-title>
+            <v-toolbar-title>Contract for {{selectedContract.id}}</v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-toolbar-items v-if="!selectedIdentity.contract">
+            <v-toolbar-items v-if="!selectedContract.contract">
               <v-btn
                 text
                 :loading="submitting"
@@ -82,7 +99,7 @@ export default {
     return {
       showJsonDialog: false,
       submitting: false,
-      selectedIdentity: {},
+      selectedContract: {},
       json: '',
     };
   },
@@ -92,9 +109,9 @@ export default {
     ]),
   },
   methods: {
-    ...mapActions(['registerContract']),
+    ...mapActions(['registerContract', 'initContract']),
     setAceEditorReadonly() {
-      const readonly = this.selectedIdentity.contract;
+      const readonly = this.selectedContract.contract;
       if (this.$refs.aceEditor) {
         this.$refs.aceEditor.editor.setReadOnly(readonly);
       }
@@ -102,17 +119,27 @@ export default {
     aceEditorInit() {
       this.setAceEditorReadonly();
     },
-    openDialog(identity) {
-      this.selectedIdentity = identity;
-      this.json = identity.contract ? identity.contract : '';
+    addNewContract(identity) {
+      const { id } = identity;
+      this.initContract({
+        identity: id,
+      }).then(() => {
+        this.showJsonDialog = false;
+      }).finally(() => {
+        this.submitting = false;
+      });
+    },
+    openDialog(contract) {
+      this.selectedContract = contract;
+      this.json = contract.contract ? contract.contract : '';
       this.showJsonDialog = true;
       this.setAceEditorReadonly();
     },
     submit() {
-      const { json, selectedIdentity } = this;
+      const { json, selectedContract } = this;
       this.submitting = true;
       this.registerContract({
-        identity: selectedIdentity,
+        selectedContract,
         json,
       }).then(() => {
         this.showJsonDialog = false;
