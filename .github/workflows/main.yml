@@ -16,3 +16,4 @@ jobs:
           heroku_app_name: "dash-platform-console-vue" #Must be unique in Heroku
           heroku_email: "virtualstrikingly@gmail.com"
           branch: "master"
+          buildpack: "https://github.com/heroku/heroku-buildpack-static.git"
