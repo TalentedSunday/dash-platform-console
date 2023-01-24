@@ -15,3 +15,4 @@ jobs:
           heroku_api_key: "b8d43e06-2dc5-4b21-b844-edf5cc4901d4"
           heroku_app_name: "dash-platform-console-vue" #Must be unique in Heroku
           heroku_email: "virtualstrikingly@gmail.com"
+          branch: "master"
