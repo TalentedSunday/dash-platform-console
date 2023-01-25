@@ -9,11 +9,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
       - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
         with:
           heroku_api_key: "b8d43e06-2dc5-4b21-b844-edf5cc4901d4"
           heroku_app_name: "dash-platform-console-vue" #Must be unique in Heroku
           heroku_email: "virtualstrikingly@gmail.com"
           branch: "master"
-          buildpack: "https://github.com/buildpack-ci/heroku-buildpack-multi.git"
+          appdir: "dist"
+          
