@@ -13,7 +13,7 @@ jobs:
       - name: Install dependencies
         run: npm install @vue/cli-service -g
       - name: Build
-        run: npm install
+        run: npm install --force
       - name: Build
         run: npm run build
       - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
