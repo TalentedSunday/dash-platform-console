@@ -21,6 +21,6 @@ jobs:
         script: |
           cd /var/www/dash-platform-console
           sudo git pull origin master
-          sudo npm update
+          sudo npm i
           sudo npm run build
           sudo composer update
