@@ -22,5 +22,4 @@ jobs:
           cd /var/www/dash-platform-console
           sudo git pull origin master
           sudo npm i
-          sudo npm run build
-          sudo composer update
+          NODE_OPTIONS=--max_old_space_size=4096 sudo npm run build
