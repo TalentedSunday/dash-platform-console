@@ -2,25 +2,25 @@ name: Deploy
 
 on:
   push:
-    branches:
-      - master
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Install dependencies
-        run: npm install @vue/cli-service -g
-      - name: Build
-        run: npm install --force
-      - name: Build
-        run: npm run build
-      - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
-        with:
-          heroku_api_key: "b8d43e06-2dc5-4b21-b844-edf5cc4901d4"
-          heroku_app_name: "dash-platform-console-vue" #Must be unique in Heroku
-          heroku_email: "virtualstrikingly@gmail.com"
-          branch: "master"
-          appdir: "dist"
-          
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: 22
+        script: |
+          cd /var/www/dash-platform-console
+          sudo git pull origin main
+          sudo npm update
+          sudo npm run build
+          sudo composer update
